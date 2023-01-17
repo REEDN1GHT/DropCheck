@@ -1,12 +1,13 @@
-package DataBase;
-
+package Page;
 /*import Tests.Form_Rio.BD_Request_Main_FormRIO;
 import Tests.Form_Rio.Form_Rio_02.BD_Requests_02formRIO;
 import Tests.Form_Rio.Form_Rio_11.BD_Requests_11formRIO_TableOne;
 import Tests.Monitoring.Budget_indicators_MO.Const_Monitoring_KS;
 import Tests.Report_form_documents.BD_Request_Monthly_Report_0503117;*/
+import Main.GUI;
 import org.apache.commons.io.FileUtils;
 
+import org.junit.Before;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -21,9 +22,9 @@ import java.sql.SQLException;
 import java.time.Duration;
 
 
-public class TestBase {
-    protected static WebDriver driver;
-    protected static WebDriverWait wait;
+public class TestBase extends JFrame {
+    public static WebDriver driver;
+    public static WebDriverWait wait;
     protected static JFrame jFrame;
     public static BD con = new BD();
     public static String getMessage;
@@ -32,10 +33,10 @@ public class TestBase {
     public Const_Monitoring_KS request_monitoring_KS = new Const_Monitoring_KS();
     public BD_Requests_11formRIO_TableOne requests_11formRIO_tableOne = new BD_Requests_11formRIO_TableOne();
     public BD_Requests_02formRIO requests_02formRIO = new BD_Requests_02formRIO();*/
-    @BeforeClass
-    public void setUp() throws SQLException, ClassNotFoundException {
-        con.getConnectionBudget22();
-        con.getConnectionBudget21();
+    @Before
+    public void setUp() throws SQLException, ClassNotFoundException, Exception  {
+        con.getConnectionBudget22KF();
+        con.getConnectionBudget21KF();
         con.getConnectionEDOKF();
         System.setProperty("webdriver.chrome.driver","drivers\\chromedriver.exe");
         //
@@ -49,8 +50,8 @@ public class TestBase {
     public void tearDown() throws IOException, SQLException {
         var sourceFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
         FileUtils.copyFile(sourceFile,new File("C:\\creen\\screenshot.png"));
-        con.closeConnectBudget22();
-        con.closeConnectBudget21();
+        con.closeConnectBudget22KF();
+        con.closeConnectBudget21KF();
         con.closeConnectionEDOKF();
         driver.quit();
     }
