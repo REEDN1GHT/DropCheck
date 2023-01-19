@@ -10,9 +10,9 @@ import java.util.List;
 import static Main.GUI.*;
 
 public class SQL extends BD {
+    public static List<String> RLyear = new ArrayList<>();
 
-    public String SQLText() {
-        List<String> RLyear = new ArrayList<>();
+    public List<String> SQLText() {
         Statement statementYEAR = null;
         try {
             if (sTestKF.isSelected() && y22.isSelected()) {
@@ -31,10 +31,12 @@ public class SQL extends BD {
                 String ListYEARformRIO = ResultYEAR.getString(SQLSTATICCOLUM);
                 RLyear.add(String.join(" ", ListYEARformRIO).trim());
                 Collections.sort(RLyear);
+
             }
+            System.out.println("RLyear" + RLyear);
         } catch (SQLException | ClassNotFoundException throwables) {
             throwables.printStackTrace();
         }
-        return RLyear.toString();
+        return RLyear;
     }
 }

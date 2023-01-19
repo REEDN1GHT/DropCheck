@@ -2,17 +2,10 @@ package Main;
 
 
 import Page.BD;
-import Page.BrowserPart;
 import Page.SQL;
-import Page.TestBase;
-import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import javax.swing.*;
@@ -24,6 +17,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static Page.SQL.RLyear;
 
 
 public class GUI extends JFrame {
@@ -32,13 +32,13 @@ public class GUI extends JFrame {
     public static JRadioButton y22 = new JRadioButton("22 год");
     public static JRadioButton y23 = new JRadioButton("23 год");
     private JLabel Llogin = new JLabel("Логин");
-    private JTextField Login = new JTextField("Login", 100);
+    private JTextField Login = new JTextField("7807018464", 100);
     private JLabel Lpassword = new JLabel("Пароль");
-    private JTextField Password = new JTextField("Password", 100);
+    private JTextField Password = new JTextField("7807018464", 100);
     private JLabel LUrlForm = new JLabel("Ссылка на форму");
-    private JTextField urlForm = new JTextField("urlForm", 500);
+    private JTextField urlForm = new JTextField("http://172.31.1.149/agreement/main/documents/form", 500);
     private JLabel LXpathForm = new JLabel("Локатор");
-    private JTextField XpathField = new JTextField("XpathField", 1000);
+    private JTextField XpathField = new JTextField("//*[@id=\"undefined-kbk-7807018464\"]/div[3]/ul/li", 1000);
     private JLabel LSqlText = new JLabel("SQL Запрос");
     private JTextField SqlText = new JTextField("SqlText", 1000);
     private JLabel LSqlColum = new JLabel("Имя столбца");
@@ -86,6 +86,7 @@ public class GUI extends JFrame {
             RadioGroup1.add(sTestUKT);
             container.add(sTestKF);
             container.add(sTestUKT);
+            sTestKF.setSelected(true);
             ButtonGroup RadioGroup2 = new ButtonGroup();
             RadioGroup2.add(y22);
             RadioGroup2.add(y23);
@@ -106,9 +107,21 @@ public class GUI extends JFrame {
         }
     }
         class ButtonEvent extends BD implements ActionListener {
+            public List<String> CheckList(By str) {
+                List<String> myValuess = driver1.findElements(str)
+                        .stream()
+                        .map(option -> option.getAttribute("innerText").trim())
+                        //.sorted()
+                        .collect(Collectors.toList());
+
+                //if (Objects.equals(myValuess.get(0), "\u00a0")) {
+                //    myValuess.set(0, " ");
+                // }
+                System.out.println("myValuess" + myValuess);
+                return myValuess;
+            }
             public SQL requestSQL = new SQL();
             public void actionPerformed (ActionEvent e) {
-                BrowserPart BP = new BrowserPart();
                 System.setProperty("webdriver.chrome.driver","drivers\\chromedriver.exe");
                 driver1 = new ChromeDriver();
                 wait1 = new WebDriverWait(driver1, Duration.ofSeconds(5));
@@ -120,36 +133,69 @@ public class GUI extends JFrame {
                 staticXpathObject = XpathField.getText();
                 SQLSTATICCOLUM = SqlColum.getText();
                 SQLSTATIC = SqlText.getText();
-                    /*if (sTestKF.isSelected()) {
-                        BP.TestGetURLKF();
-                        System.out.println('1');
+                if (sTestUKT.isSelected()) {
+                    driver1.navigate().to(URLUKT);
+                    System.out.println('1');
                     } else {
-                        BP.TestGetURLUKT();
-                        System.out.println('2');
-                    }
-                driver1.quit();*/
-                //driver1.findElement(ByLogin).sendKeys(staticLogin);
-                //driver1.findElement(ByPassword).sendKeys(staticPassword);
-                //driver1.findElement(ByConfirmButton).click();
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e2) {
-                    throw new RuntimeException(e2);
+                    driver1.navigate().to(URLKF);
+                    System.out.println('2');
                 }
-                /*driver1.navigate().to(staticUrlForm);
                 try {
                     Thread.sleep(5000);
-                } catch (InterruptedException e2) {
-                    throw new RuntimeException(e2);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
                 }
-                String ResultEDO = BP.CheckList(By.id(staticXpathObject));
-                driver1.quit();*/
+                driver1.findElement(ByLogin).sendKeys(staticLogin);
+                driver1.findElement(ByPassword).sendKeys(staticPassword);
+                driver1.findElement(ByConfirmButton).click();
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+                driver1.navigate().to(staticUrlForm);
+                try {
+                    Thread.sleep(35000);
+                } catch (InterruptedException ex2) {
+                    throw new RuntimeException(ex2);
+                }
+                By ByXpath = By.xpath(staticXpathObject + "[@class='multiselect__element']");
+                List <String> ResultEDO = CheckList(ByXpath);
+                List <String> ResultSQL = requestSQL.SQLText();
+                int SizeEDO = ResultEDO.size();
+                int SizeSQL = ResultSQL.size();
+                driver1.quit();
+                boolean isEqual = (ResultEDO.equals(ResultSQL));
                 String message = "";
-                message += (sTestKF.isSelected() ? "Тест КФ" : "Тест УКТ");
-                message += (y22.isSelected() ? "22" : "23");
-                //message += ResultEDO;
-                //message += requestSQL.SQLText();
-                JOptionPane.showConfirmDialog(null, message, "Result", JOptionPane.DEFAULT_OPTION);
+                message += (sTestKF.isSelected() ? "Контур Тест КФ " : "Контур Тест УКТ " + "\n" );
+                message += (y22.isSelected() ? "22 " : "23 " + "\n");
+                if (isEqual) {
+                    message += "Списки идентичны";
+                } else {
+                    if (SizeSQL>SizeEDO) {
+                        ResultSQL.removeAll(ResultEDO);
+                        System.out.println("ResultSQL " + "\n" + ResultSQL + "\n" + "Size " + ResultSQL.size() );
+                        message += "Списки различаются" + "ЭДО " + SizeEDO + "АИС БП " + SizeSQL + "\n";
+                        message += "Кол-во значений отсутствующих в ЭДО " + ResultSQL.size() + "\n";
+                        message += "Список значений" + "\n";
+                        message += ResultSQL + "\r\n";
+
+                    } else {
+                        ResultEDO.removeAll(ResultSQL);
+                        System.out.println("ResultSQL " + "\n" + ResultEDO + "\n" + "Size " + ResultEDO.size());
+                        message += "Списки различаются" + "ЭДО " + SizeEDO + "АИС БП " + SizeSQL + "\n";
+                        message += "Кол-во значений отсутствующих в АИС-БП " + ResultEDO.size() + "\n";
+                        message += "Список значений" + "\n";
+                        message += ResultEDO + "\n";
+                    }
+                }
+                JOptionPane.showConfirmDialog(null, message.replaceAll(",", "\n"), "Result", JOptionPane.DEFAULT_OPTION);
+                SizeEDO = 0;
+                SizeSQL = 0;
+                ResultEDO.clear();
+                ResultSQL.clear();
+                JFrame win = new JFrame();
+                win.revalidate();
 
             }
 
